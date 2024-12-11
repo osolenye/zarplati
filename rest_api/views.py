@@ -39,3 +39,15 @@ class AdminRegistrationViewSet(viewsets.ViewSet):
 
 class ObtainTokenPairView(TokenObtainPairView):
     pass
+
+class WorkerRegistrationViewSet(viewsets.ViewSet):
+    permission_classes = (permissions.AllowAny,)
+
+    def create(self, request):
+        serializer = WorkerSerializer(data=request.data)
+        if serializer.is_valid():
+            worker = serializer.save()
+            refresh = RefreshToken.for_user(worker)
+            access_token = str(refresh.access_token)
+            return Response({'token': access_token}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
